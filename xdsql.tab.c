@@ -4,17 +4,48 @@
 
 #define YYBISON 1  /* Identify Bison output.  */
 
-#define	NAME	257
-#define	EQ	258
-#define	AGE	259
+#define	CREATE	257
+#define	TABLE	258
+#define	ID	259
+#define	CHAR	260
+#define	NUMBER	261
+#define	INT	262
+#define	CONST_STR	263
 
 #line 1 "xdsql.y"
 
-typedef char* string;
-#define YYSTYPE string
-#ifndef YYSTYPE
-#define YYSTYPE int
-#endif
+#include<malloc.h>
+
+#define LOG 1
+
+//----------------------------------------------
+enum TYPE {T_INT, T_CHAR};		//字段可用类型
+struct	Createstruct{			/*create语法树根节点*/
+	char	*table;				//基本表名称
+	struct Createfieldsdef	*fdef;	//字段定义
+}*createroot;
+struct	Createfieldsdef{	/*create语句中的字段定义*/
+	char		*field;		//字段名称
+	enum TYPE	type;		//字段类型
+	int			length;		//字段长度
+	struct  Createfieldsdef   *next_fdef;	//下一字段
+}*createfields;
+void print_create(){
+	printf("%s\n", createroot->table);
+	struct Createfieldsdef* p = createfields;
+	while(p != NULL){
+		printf("%s,\t %d,\t %d\n",p->field, p->length, p->type);
+		p = p->next_fdef;
+	}
+}
+
+#line 28 "xdsql.y"
+typedef union					/*定义yylval的格式*/
+{	/*属于create语法树的类型*/
+	char * yych;				//字面量
+	struct Createfieldsdef	*cfdef_var;	//字段定义
+	struct Createstruct	*cs_var;	//整个create语句
+} YYSTYPE;
 #include <stdio.h>
 
 #ifndef __cplusplus
@@ -25,16 +56,19 @@ typedef char* string;
 
 
 
-#define	YYFINAL		8
+#define	YYFINAL		22
 #define	YYFLAG		-32768
-#define	YYNTBASE	6
+#define	YYNTBASE	14
 
-#define YYTRANSLATE(x) ((unsigned)(x) <= 259 ? yytranslate[x] : 8)
+#define YYTRANSLATE(x) ((unsigned)(x) <= 263 ? yytranslate[x] : 20)
 
 static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+     2,     2,     2,     2,     2,     2,     2,     2,     2,    10,
+    11,     2,     2,    13,     2,     2,     2,     2,     2,     2,
+     2,     2,     2,     2,     2,     2,     2,     2,    12,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -54,71 +88,78 @@ static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     1,     3,     4,     5
+     2,     2,     2,     2,     2,     1,     3,     4,     5,     6,
+     7,     8,     9
 };
 
 #if YYDEBUG != 0
 static const short yyprhs[] = {     0,
-     0,     3,     5
+     0,     8,    10,    12,    16,    19,    21,    26
 };
 
-static const short yyrhs[] = {     7,
-     6,     0,     7,     0,     3,     4,     5,     0
+static const short yyrhs[] = {     3,
+     4,    15,    10,    16,    11,    12,     0,     5,     0,    17,
+     0,    17,    13,    16,     0,    18,    19,     0,     5,     0,
+     6,    10,     7,    11,     0,     8,     0
 };
 
 #endif
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-     7,     8,    10
+    44,    63,    67,    71,    76,    81,    85,    92
 };
 #endif
 
 
 #if YYDEBUG != 0 || defined (YYERROR_VERBOSE)
 
-static const char * const yytname[] = {   "$","error","$undefined.","NAME","EQ",
-"AGE","file","record", NULL
+static const char * const yytname[] = {   "$","error","$undefined.","CREATE",
+"TABLE","ID","CHAR","NUMBER","INT","CONST_STR","'('","')'","';'","','","createsql",
+"table","fieldsdefinition","field_type","field","type", NULL
 };
 #endif
 
 static const short yyr1[] = {     0,
-     6,     6,     7
+    14,    15,    16,    16,    17,    18,    19,    19
 };
 
 static const short yyr2[] = {     0,
-     2,     1,     3
+     7,     1,     1,     3,     2,     1,     4,     1
 };
 
 static const short yydefact[] = {     0,
-     0,     2,     0,     1,     3,     0,     0,     0
+     0,     0,     2,     0,     0,     6,     0,     3,     0,     0,
+     0,     0,     8,     5,     1,     4,     0,     0,     7,     0,
+     0,     0
 };
 
-static const short yydefgoto[] = {     4,
-     2
+static const short yydefgoto[] = {    20,
+     4,     7,     8,     9,    14
 };
 
-static const short yypact[] = {    -3,
-    -2,    -3,    -4,-32768,-32768,     3,     4,-32768
+static const short yypact[] = {    -2,
+    -1,     0,-32768,    -4,     2,-32768,    -7,    -5,    -6,    -3,
+     2,     1,-32768,-32768,-32768,-32768,     3,     4,-32768,    12,
+    13,-32768
 };
 
-static const short yypgoto[] = {     5,
--32768
+static const short yypgoto[] = {-32768,
+-32768,     5,-32768,-32768,-32768
 };
 
 
-#define	YYLAST		5
+#define	YYLAST		16
 
 
-static const short yytable[] = {     1,
-     5,     3,     7,     8,     6
+static const short yytable[] = {    12,
+     1,    13,     2,    10,     3,     5,     6,    11,    15,    18,
+    17,    21,    22,     0,    19,    16
 };
 
-static const short yycheck[] = {     3,
-     5,     4,     0,     0,     0
+static const short yycheck[] = {     6,
+     3,     8,     4,    11,     5,    10,     5,    13,    12,     7,
+    10,     0,     0,    -1,    11,    11
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/local/share/bison.simple"
@@ -663,10 +704,83 @@ yyreduce:
 
   switch (yyn) {
 
-case 3:
-#line 10 "xdsql.y"
+case 1:
+#line 44 "xdsql.y"
 {
-	printf("%s is %s\n",yyvsp[-2],yyvsp[0]);
+	createroot = malloc(sizeof(struct Createstruct));
+	createroot->table = yyvsp[-4].yych;
+	/*
+	struct Createfieldsdef *p, *pre, *next;
+	p  = createfields;
+	pre = NULL;
+	while(p != NULL){
+		next = p->next_fdef;
+		p->next_fdef = pre;
+		pre = p;
+		createfields = p;
+		p = next;
+	}
+	createroot->fdef = createfields;
+	*/
+	if(LOG) printf("createsql\n");
+	print_create();
+;
+    break;}
+case 2:
+#line 63 "xdsql.y"
+{
+	yyval.yych = yyvsp[0].yych;
+	if(LOG) printf("table %s\n", yyval.yych);
+;
+    break;}
+case 3:
+#line 67 "xdsql.y"
+{
+	yyvsp[0].cfdef_var->next_fdef = NULL;
+	yyval.cfdef_var = yyvsp[0].cfdef_var;
+;
+    break;}
+case 4:
+#line 71 "xdsql.y"
+{
+	yyvsp[-2].cfdef_var->next_fdef = yyvsp[0].cfdef_var;
+	createfields = yyvsp[-2].cfdef_var;
+	yyval.cfdef_var = yyvsp[-2].cfdef_var;
+;
+    break;}
+case 5:
+#line 76 "xdsql.y"
+{
+	yyvsp[0].cfdef_var->field = yyvsp[-1].yych;
+	yyval.cfdef_var = yyvsp[0].cfdef_var;
+	if(LOG) printf("field_type %s,%d,%d\n", yyval.cfdef_var->field, yyval.cfdef_var->length, yyval.cfdef_var->type);
+;
+    break;}
+case 6:
+#line 81 "xdsql.y"
+{
+	yyval.yych = yyvsp[0].yych;
+	if(LOG) printf("field %s\n", yyvsp[0].yych);
+;
+    break;}
+case 7:
+#line 85 "xdsql.y"
+{
+	struct Createfieldsdef* p = malloc(sizeof(struct Createfieldsdef));
+	p->type = T_CHAR;
+	p->length = atoi(yyvsp[-1].yych);
+	yyval.cfdef_var = p;
+	if(LOG) printf("type CHAR(%s)\n", yyvsp[-1].yych);
+;
+    break;}
+case 8:
+#line 92 "xdsql.y"
+{
+	struct Createfieldsdef* p = malloc(sizeof(struct Createfieldsdef));
+	p->type = T_INT;
+	p->length = 0;
+	yyval.cfdef_var = p;
+	if(LOG) printf("type INT\n");
 ;
     break;}
 }
@@ -891,12 +1005,12 @@ yyerrhandle:
     }
   return 1;
 }
-#line 14 "xdsql.y"
+#line 100 "xdsql.y"
 
 int main(){
 	yyparse();
 	return 0;
 }
 int yyerror(char* msg){
-	printf("Error encountered:%s\n", msg);
+	printf("Error: %s\n", msg);
 }

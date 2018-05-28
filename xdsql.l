@@ -3,25 +3,43 @@
 
 #include<stdio.h>
 #include<string.h>
-extern int yylval;
+
 %}
-char [A-Za-z]
-num [0-9]
-eq [=]
-name {char}+
-age {num}+
+
+id [A-Za-z][A-Za-z0-9_]*
+number [0-9]+
+const_str '.*'
+
 %%
-{name} {
-	yylval=(int)strdup(yytext);
-	return NAME;
+CREATE	{return CREATE;}
+TABLE	{return TABLE;}
+CHAR	{return CHAR;}
+INT		{return INT;}
+{id} {
+	yylval.yych = strdup(yytext);
+	return ID;
 }
-{eq} {
-	return EQ;
+{number} {
+	yylval.yych = strdup(yytext);
+	return NUMBER;
 }
-{age} {
-	yylval=(int)strdup(yytext);
-	return AGE;
+{const_str} {
+	char* p = malloc(strlen(yytext)-1);
+	strncpy(p, yytext+1, strlen(yytext)-2);
+	yylval.yych = p;
+	printf("CONST_STR: %s\n", p);
+	return CONST_STR;
 }
+
+"="		|
+">"		|
+"<"		|
+"!="	|
+";"		|
+"("		|
+")"		|
+","		{return yytext[0]; }
+
 %%
 int yywrap(){
 	return 1;

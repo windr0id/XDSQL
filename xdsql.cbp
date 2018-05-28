@@ -31,9 +31,18 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<ExtraCommands>
+			<Add before="flex xdsql.l" />
+			<Add before="bison -d xdsql.y" />
+			<Mode after="always" />
+		</ExtraCommands>
+		<Unit filename="lex.yy.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="xdsql.tab.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="xdsql.tab.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
